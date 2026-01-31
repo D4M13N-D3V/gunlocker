@@ -26,23 +26,15 @@ A personal inventory and logbook application for tracking firearms, gear, ammuni
 
 ### Using Docker (Recommended)
 
-The Docker image comes pre-configured with the app name and database schema. On first run, it automatically:
-- Creates an admin account
-- Imports all collection schemas
-- Configures app settings
-
 ```bash
 # Pull and run from GitHub Container Registry
 docker run -d \
   -p 8090:8090 \
   -v gunlocker_data:/pb/pb_data \
-  -e PB_ADMIN_EMAIL=admin@example.com \
+  -e PB_ADMIN_EMAIL=your@email.com \
   -e PB_ADMIN_PASSWORD=your_secure_password \
   --name gunlocker \
   ghcr.io/d4m13n-d3v/gunlocker:latest
-
-# Or use docker-compose (edit docker-compose.yml first to set credentials)
-docker-compose up -d
 ```
 
 Access the app at http://localhost:8090
@@ -53,15 +45,42 @@ Access the app at http://localhost:8090
 |----------|-------------|---------|
 | `PB_ADMIN_EMAIL` | Admin email (first run only) | `admin@gunlocker.local` |
 | `PB_ADMIN_PASSWORD` | Admin password (first run only) | `changeme123` |
-| `VITE_POCKETBASE_URL` | PocketBase API URL | Auto-detected |
 
 ### First Time Setup
 
-1. Access the app at http://localhost:8090
-2. Click "Register" to create a user account
-3. Start adding your inventory!
+On first run, the container will automatically create an admin account using the environment variables above. You'll need to manually import the database schema:
 
-**Admin Panel**: Access http://localhost:8090/_/ with your admin credentials to manage collections, users, and settings.
+1. **Access the Admin Panel**
+   - Navigate to http://localhost:8090/_/
+   - Log in with your admin credentials (the email/password from env vars, or defaults if not set)
+
+2. **Import the Schema**
+   - Go to **Settings** (gear icon) → **Import collections**
+   - Copy the schema from the container:
+     ```bash
+     docker cp gunlocker:/pb/pb_schema.json ./pb_schema.json
+     ```
+   - Or download it from this repository: [pb_schema.json](./pb_schema.json)
+   - Click **Load from JSON file** and select the schema file
+   - Review the collections and click **Confirm and import**
+
+3. **Start Using the App**
+   - Navigate to http://localhost:8090
+   - Click **Register** to create a user account
+   - Start adding your inventory!
+
+### Changing Admin Credentials
+
+If you need to change the admin credentials after initial setup:
+
+1. Access the admin panel at http://localhost:8090/_/
+2. Go to **Settings** → **Admins**
+3. Edit or create admin accounts as needed
+
+Or use the PocketBase CLI inside the container:
+```bash
+docker exec -it gunlocker ./pocketbase superuser upsert newemail@example.com newpassword
+```
 
 ### Local Development
 
@@ -84,10 +103,7 @@ Or run both together:
 npm run start
 ```
 
-For local development, you'll need to manually import the schema:
-1. Navigate to http://localhost:8090/_/
-2. Create a superuser account
-3. Go to Settings > Import collections and import `pb_schema.json`
+For local development, follow the same schema import steps above using the admin panel at http://localhost:8090/_/
 
 ## Available Scripts
 
@@ -119,7 +135,7 @@ gunlocker/
 │   └── pages/            # Page components
 ├── Dockerfile            # Container build
 ├── docker-compose.yml    # Container orchestration
-├── entrypoint.sh         # Docker entrypoint with auto-setup
+├── entrypoint.sh         # Docker entrypoint
 └── pb_schema.json        # PocketBase collection schema
 ```
 
