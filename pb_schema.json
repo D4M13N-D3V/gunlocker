@@ -45,6 +45,7 @@
       { "id": "ammo_grain", "name": "grain", "type": "number", "system": false, "required": false, "hidden": false, "presentable": false, "min": null, "max": null, "noDecimal": true },
       { "id": "ammo_type", "name": "type", "type": "text", "system": false, "required": false, "hidden": false, "presentable": false, "autogeneratePattern": "", "min": 0, "max": 0, "pattern": "", "primaryKey": false },
       { "id": "ammo_qty", "name": "quantity", "type": "number", "system": false, "required": true, "hidden": false, "presentable": false, "min": 0, "max": null, "noDecimal": true },
+      { "id": "ammo_pqty", "name": "purchased_quantity", "type": "number", "system": false, "required": false, "hidden": false, "presentable": false, "min": 0, "max": null, "noDecimal": true },
       { "id": "ammo_lot", "name": "lot_number", "type": "text", "system": false, "required": false, "hidden": false, "presentable": false, "autogeneratePattern": "", "min": 0, "max": 0, "pattern": "", "primaryKey": false },
       { "id": "ammo_pdate", "name": "purchase_date", "type": "date", "system": false, "required": false, "hidden": false, "presentable": false, "min": "", "max": "" },
       { "id": "ammo_pprice", "name": "purchase_price", "type": "number", "system": false, "required": false, "hidden": false, "presentable": false, "min": null, "max": null, "noDecimal": false },

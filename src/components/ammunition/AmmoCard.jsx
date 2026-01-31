@@ -1,11 +1,18 @@
 import Card from '../common/Card'
 
 export default function AmmoCard({ ammo, onClick }) {
-  const getQuantityColor = (qty) => {
-    if (qty <= 50) return 'text-red-600 dark:text-red-400'
-    if (qty <= 100) return 'text-yellow-600 dark:text-yellow-400'
+  const getQuantityColor = (qty, purchased) => {
+    if (!purchased) purchased = qty
+    const percent = (qty / purchased) * 100
+    if (percent <= 20) return 'text-red-600 dark:text-red-400'
+    if (percent <= 50) return 'text-yellow-600 dark:text-yellow-400'
     return 'text-green-600 dark:text-green-400'
   }
+
+  const used = (ammo.purchased_quantity || ammo.quantity) - ammo.quantity
+  const usedPercent = ammo.purchased_quantity
+    ? Math.round((used / ammo.purchased_quantity) * 100)
+    : 0
 
   return (
     <Card hover onClick={onClick} className="cursor-pointer">
@@ -19,10 +26,38 @@ export default function AmmoCard({ ammo, onClick }) {
               {ammo.caliber} {ammo.grain && `- ${ammo.grain}gr`}
             </p>
           </div>
-          <span className={`text-lg font-bold ${getQuantityColor(ammo.quantity)}`}>
-            {ammo.quantity?.toLocaleString() || 0}
-          </span>
+          <div className="text-right">
+            <span className={`text-lg font-bold ${getQuantityColor(ammo.quantity, ammo.purchased_quantity)}`}>
+              {ammo.quantity?.toLocaleString() || 0}
+            </span>
+            {ammo.purchased_quantity && ammo.purchased_quantity !== ammo.quantity && (
+              <p className="text-xs text-gray-500">
+                of {ammo.purchased_quantity.toLocaleString()}
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Usage bar */}
+        {ammo.purchased_quantity > 0 && (
+          <div className="mt-2">
+            <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full ${
+                  usedPercent >= 80 ? 'bg-red-500' :
+                  usedPercent >= 50 ? 'bg-yellow-500' :
+                  'bg-green-500'
+                }`}
+                style={{ width: `${100 - usedPercent}%` }}
+              />
+            </div>
+            {used > 0 && (
+              <p className="text-xs text-gray-500 mt-1">
+                {used.toLocaleString()} used ({usedPercent}%)
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="mt-3 flex items-center justify-between text-sm">
           {ammo.lot_number && (

@@ -13,6 +13,7 @@ export default function AmmoForm({ ammoId, onClose }) {
     grain: '',
     type: '',
     quantity: 0,
+    purchased_quantity: 0,
     lot_number: '',
     purchase_date: '',
     purchase_price: '',
@@ -27,6 +28,7 @@ export default function AmmoForm({ ammoId, onClose }) {
         grain: existingAmmo.grain || '',
         type: existingAmmo.type || '',
         quantity: existingAmmo.quantity || 0,
+        purchased_quantity: existingAmmo.purchased_quantity || existingAmmo.quantity || 0,
         lot_number: existingAmmo.lot_number || '',
         purchase_date: existingAmmo.purchase_date?.split('T')[0] || '',
         purchase_price: existingAmmo.purchase_price || '',
@@ -129,7 +131,27 @@ export default function AmmoForm({ ammoId, onClose }) {
         </div>
 
         <div>
-          <label className="label">Quantity *</label>
+          <label className="label">Purchased Quantity *</label>
+          <input
+            type="number"
+            name="purchased_quantity"
+            value={formData.purchased_quantity}
+            onChange={(e) => {
+              handleChange(e)
+              // For new ammo, sync remaining with purchased
+              if (!ammoId) {
+                setFormData(prev => ({ ...prev, quantity: parseFloat(e.target.value) || 0 }))
+              }
+            }}
+            required
+            min="0"
+            placeholder="Total rounds purchased"
+            className="input"
+          />
+        </div>
+
+        <div>
+          <label className="label">Remaining *</label>
           <input
             type="number"
             name="quantity"
@@ -137,8 +159,14 @@ export default function AmmoForm({ ammoId, onClose }) {
             onChange={handleChange}
             required
             min="0"
+            max={formData.purchased_quantity || undefined}
             className="input"
           />
+          {formData.purchased_quantity > 0 && formData.quantity < formData.purchased_quantity && (
+            <p className="text-xs text-gray-500 mt-1">
+              Used: {formData.purchased_quantity - formData.quantity} rounds ({Math.round((formData.purchased_quantity - formData.quantity) / formData.purchased_quantity * 100)}%)
+            </p>
+          )}
         </div>
 
         <div>
