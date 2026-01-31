@@ -1,4 +1,5 @@
 import Card from '../common/Card'
+import AutoRotateImage from '../common/AutoRotateImage'
 import { WarrantyIcon } from '../common/WarrantyBadge'
 import { getThumbUrl } from '../../lib/pocketbase'
 import { OPTIC_TYPES } from '../../hooks/useOptics'
@@ -12,7 +13,7 @@ export default function OpticsCard({ optic, onClick }) {
       <div className="flex gap-3 p-4">
         <div className="w-16 h-16 flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
           {photoUrl ? (
-            <img src={photoUrl} alt={optic.name} className="w-full h-full object-cover" />
+            <AutoRotateImage src={photoUrl} alt={optic.name} className="w-full h-full object-cover" containerClassName="w-full h-full" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <svg className="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

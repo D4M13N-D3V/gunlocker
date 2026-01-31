@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import Card from '../common/Card'
+import AutoRotateImage from '../common/AutoRotateImage'
 import { WarrantyIcon } from '../common/WarrantyBadge'
 import { getThumbUrl } from '../../lib/pocketbase'
 
@@ -28,10 +29,11 @@ export default function FirearmCard({ firearm }) {
         {/* Image */}
         <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
           {photoUrl ? (
-            <img
+            <AutoRotateImage
               src={photoUrl}
               alt={firearm.name}
               className="w-full h-full object-cover"
+              containerClassName="w-full h-full"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

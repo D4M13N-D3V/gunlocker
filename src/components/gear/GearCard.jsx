@@ -1,4 +1,5 @@
 import Card from '../common/Card'
+import AutoRotateImage from '../common/AutoRotateImage'
 import { WarrantyIcon } from '../common/WarrantyBadge'
 import { getThumbUrl } from '../../lib/pocketbase'
 import { GEAR_CATEGORIES, CONDITION_OPTIONS } from '../../hooks/useGear'
@@ -17,10 +18,11 @@ export default function GearCard({ gear, onClick }) {
         {/* Image */}
         <div className="w-16 h-16 flex-shrink-0 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
           {photoUrl ? (
-            <img
+            <AutoRotateImage
               src={photoUrl}
               alt={gear.name}
               className="w-full h-full object-cover"
+              containerClassName="w-full h-full"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
