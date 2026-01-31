@@ -176,6 +176,19 @@ export default function FirearmDetail() {
                   </dd>
                 </div>
                 <div>
+                  <dt className="text-sm text-gray-500">Current Value</dt>
+                  <dd className="font-medium text-gray-900 dark:text-white">
+                    {firearm.current_value
+                      ? `$${firearm.current_value.toLocaleString()}`
+                      : '-'}
+                    {firearm.purchase_price && firearm.current_value && (
+                      <span className={`ml-2 text-xs ${firearm.current_value >= firearm.purchase_price ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        ({firearm.current_value >= firearm.purchase_price ? '+' : ''}{((firearm.current_value - firearm.purchase_price) / firearm.purchase_price * 100).toFixed(0)}%)
+                      </span>
+                    )}
+                  </dd>
+                </div>
+                <div>
                   <dt className="text-sm text-gray-500">Purchase Location</dt>
                   <dd className="font-medium text-gray-900 dark:text-white">
                     {firearm.purchase_location || '-'}

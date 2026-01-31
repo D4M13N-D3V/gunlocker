@@ -14,6 +14,7 @@
       { "id": "firearms_type", "name": "type", "type": "select", "system": false, "required": false, "hidden": false, "presentable": false, "maxSelect": 1, "values": ["handgun", "rifle", "shotgun", "other"] },
       { "id": "firearms_pdate", "name": "purchase_date", "type": "date", "system": false, "required": false, "hidden": false, "presentable": false, "min": "", "max": "" },
       { "id": "firearms_pprice", "name": "purchase_price", "type": "number", "system": false, "required": false, "hidden": false, "presentable": false, "min": null, "max": null, "noDecimal": false },
+      { "id": "firearms_cvalue", "name": "current_value", "type": "number", "system": false, "required": false, "hidden": false, "presentable": false, "min": null, "max": null, "noDecimal": false },
       { "id": "firearms_ploc", "name": "purchase_location", "type": "text", "system": false, "required": false, "hidden": false, "presentable": false, "autogeneratePattern": "", "min": 0, "max": 0, "pattern": "", "primaryKey": false },
       { "id": "firearms_warranty", "name": "warranty_expires", "type": "date", "system": false, "required": false, "hidden": false, "presentable": false, "min": "", "max": "" },
       { "id": "firearms_notes", "name": "notes", "type": "text", "system": false, "required": false, "hidden": false, "presentable": false, "autogeneratePattern": "", "min": 0, "max": 0, "pattern": "", "primaryKey": false },

@@ -33,6 +33,7 @@ export default function FirearmForm({ firearmId, onClose }) {
     type: 'handgun',
     purchase_date: '',
     purchase_price: '',
+    current_value: '',
     purchase_location: '',
     warranty_expires: '',
     notes: '',
@@ -56,6 +57,7 @@ export default function FirearmForm({ firearmId, onClose }) {
         type: existingFirearm.type || 'handgun',
         purchase_date: existingFirearm.purchase_date?.split('T')[0] || '',
         purchase_price: existingFirearm.purchase_price || '',
+        current_value: existingFirearm.current_value || '',
         purchase_location: existingFirearm.purchase_location || '',
         warranty_expires: existingFirearm.warranty_expires?.split('T')[0] || '',
         notes: existingFirearm.notes || '',
@@ -245,6 +247,20 @@ export default function FirearmForm({ firearmId, onClose }) {
               min="0"
               step="0.01"
               placeholder="0.00"
+              className="input"
+            />
+          </div>
+
+          <div>
+            <label className="label">Current Value</label>
+            <input
+              type="number"
+              name="current_value"
+              value={formData.current_value}
+              onChange={handleChange}
+              min="0"
+              step="0.01"
+              placeholder="Blue Book value"
               className="input"
             />
           </div>
