@@ -22,7 +22,8 @@ FROM alpine:3.19
 RUN apk add --no-cache \
     ca-certificates \
     unzip \
-    wget
+    wget \
+    curl
 
 # Set PocketBase version
 ENV PB_VERSION=0.23.12

@@ -37,11 +37,11 @@ for i in $(seq 1 30); do
     sleep 1
 done
 
-# Authenticate as admin
+# Authenticate as superuser (PocketBase 0.23+ uses _superusers collection)
 echo "Authenticating..."
-AUTH_RESPONSE=$(wget -q -O - --post-data="{\"identity\":\"$PB_ADMIN_EMAIL\",\"password\":\"$PB_ADMIN_PASSWORD\"}" \
-    --header="Content-Type: application/json" \
-    http://localhost:8090/api/admins/auth-with-password 2>/dev/null || echo "")
+AUTH_RESPONSE=$(curl -s -X POST http://localhost:8090/api/collections/_superusers/auth-with-password \
+    -H "Content-Type: application/json" \
+    -d "{\"identity\":\"$PB_ADMIN_EMAIL\",\"password\":\"$PB_ADMIN_PASSWORD\"}" 2>/dev/null || echo "")
 
 TOKEN=$(echo "$AUTH_RESPONSE" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 
@@ -52,14 +52,14 @@ else
     # Import collections schema
     echo "Importing collections schema..."
     if [ -f "$SCHEMA_FILE" ]; then
-        IMPORT_RESULT=$(wget -q -O - --method=PUT \
-            --body-file="$SCHEMA_FILE" \
-            --header="Authorization: $TOKEN" \
-            --header="Content-Type: application/json" \
-            "http://localhost:8090/api/collections/import" 2>/dev/null || echo "failed")
+        IMPORT_RESULT=$(curl -s -X PUT http://localhost:8090/api/collections/import \
+            -H "Authorization: $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d @"$SCHEMA_FILE" 2>/dev/null || echo "failed")
 
-        if echo "$IMPORT_RESULT" | grep -q "failed"; then
-            echo "Warning: Schema import may have failed. Check admin UI."
+        if echo "$IMPORT_RESULT" | grep -q "code"; then
+            echo "Warning: Schema import may have failed: $IMPORT_RESULT"
+            echo "You can manually import pb_schema.json via the admin UI."
         else
             echo "Schema imported successfully!"
         fi
@@ -67,11 +67,10 @@ else
 
     # Set application settings
     echo "Configuring application settings..."
-    wget -q -O - --method=PATCH \
-        --body-data='{"meta":{"appName":"Gun Locker","appUrl":"","hideControls":false,"senderName":"Gun Locker","senderAddress":"noreply@gunlocker.local"}}' \
-        --header="Authorization: $TOKEN" \
-        --header="Content-Type: application/json" \
-        "http://localhost:8090/api/settings" 2>/dev/null || echo "Warning: Could not set app settings"
+    curl -s -X PATCH http://localhost:8090/api/settings \
+        -H "Authorization: $TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{"meta":{"appName":"Gun Locker","appUrl":"","hideControls":false,"senderName":"Gun Locker","senderAddress":"noreply@gunlocker.local"}}' 2>/dev/null || echo "Warning: Could not set app settings"
 
     echo "Application configured!"
 fi
