@@ -82,7 +82,7 @@ export function useUpdateOptic() {
               formData.append(key, file)
             })
           }
-        } else if (value !== undefined && value !== null) {
+        } else if (value !== undefined && value !== null && value !== '') {
           formData.append(key, value)
         }
       })

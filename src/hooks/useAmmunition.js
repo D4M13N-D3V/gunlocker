@@ -33,10 +33,14 @@ export function useCreateAmmo() {
 
   return useMutation({
     mutationFn: async (data) => {
-      return pb.collection(COLLECTION).create({
-        ...data,
-        user: pb.authStore.model.id,
+      // Filter out empty values to avoid PocketBase issues
+      const cleanData = { user: pb.authStore.model.id }
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          cleanData[key] = value
+        }
       })
+      return pb.collection(COLLECTION).create(cleanData)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
@@ -53,7 +57,14 @@ export function useUpdateAmmo() {
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      return pb.collection(COLLECTION).update(id, data)
+      // Filter out empty values, but allow explicit null to clear fields
+      const cleanData = {}
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          cleanData[key] = value === null ? '' : value
+        }
+      })
+      return pb.collection(COLLECTION).update(id, cleanData)
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
