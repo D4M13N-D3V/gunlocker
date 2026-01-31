@@ -2,7 +2,7 @@
 
 A personal inventory and logbook application for tracking firearms, gear, ammunition, and range activities. Built with React and PocketBase.
 Public Instance
-https://gunlocker.d4m13n.dev/firearms
+https://gunlocker.d4m13n.dev/
 
 ## Features
 
