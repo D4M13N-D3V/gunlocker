@@ -25,22 +25,36 @@ RUN apk add --no-cache \
     wget
 
 # Set PocketBase version
-ENV PB_VERSION=0.22.27
+ENV PB_VERSION=0.23.12
 
-# Download and install PocketBase
-RUN wget -q https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip \
-    && unzip pocketbase_${PB_VERSION}_linux_amd64.zip -d /pb \
-    && rm pocketbase_${PB_VERSION}_linux_amd64.zip \
+# Download and install PocketBase (multi-arch support)
+ARG TARGETARCH
+RUN case "${TARGETARCH}" in \
+        "amd64") PB_ARCH="amd64" ;; \
+        "arm64") PB_ARCH="arm64" ;; \
+        *) PB_ARCH="amd64" ;; \
+    esac && \
+    wget -q https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_${PB_ARCH}.zip \
+    && unzip pocketbase_${PB_VERSION}_linux_${PB_ARCH}.zip -d /pb \
+    && rm pocketbase_${PB_VERSION}_linux_${PB_ARCH}.zip \
     && chmod +x /pb/pocketbase
 
 # Copy built frontend to PocketBase public directory
 COPY --from=frontend-builder /app/dist /pb/pb_public
 
-# Copy PocketBase schema for migrations
+# Copy PocketBase schema
 COPY pb_schema.json /pb/pb_schema.json
+
+# Copy entrypoint script
+COPY entrypoint.sh /pb/entrypoint.sh
+RUN chmod +x /pb/entrypoint.sh
 
 # Create data directory
 RUN mkdir -p /pb/pb_data
+
+# Environment variables for initial setup
+ENV PB_ADMIN_EMAIL=admin@gunlocker.local
+ENV PB_ADMIN_PASSWORD=changeme123
 
 # Expose port
 EXPOSE 8090
@@ -49,8 +63,8 @@ EXPOSE 8090
 WORKDIR /pb
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
 
-# Run PocketBase
-CMD ["./pocketbase", "serve", "--http=0.0.0.0:8090"]
+# Run entrypoint
+ENTRYPOINT ["./entrypoint.sh"]

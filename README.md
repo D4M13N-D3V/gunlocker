@@ -26,26 +26,42 @@ A personal inventory and logbook application for tracking firearms, gear, ammuni
 
 ### Using Docker (Recommended)
 
+The Docker image comes pre-configured with the app name and database schema. On first run, it automatically:
+- Creates an admin account
+- Imports all collection schemas
+- Configures app settings
+
 ```bash
 # Pull and run from GitHub Container Registry
 docker run -d \
   -p 8090:8090 \
   -v gunlocker_data:/pb/pb_data \
+  -e PB_ADMIN_EMAIL=admin@example.com \
+  -e PB_ADMIN_PASSWORD=your_secure_password \
   --name gunlocker \
   ghcr.io/d4m13n-d3v/gunlocker:latest
 
-# Or use docker-compose
+# Or use docker-compose (edit docker-compose.yml first to set credentials)
 docker-compose up -d
 ```
 
 Access the app at http://localhost:8090
 
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PB_ADMIN_EMAIL` | Admin email (first run only) | `admin@gunlocker.local` |
+| `PB_ADMIN_PASSWORD` | Admin password (first run only) | `changeme123` |
+| `VITE_POCKETBASE_URL` | PocketBase API URL | Auto-detected |
+
 ### First Time Setup
 
-1. Navigate to http://localhost:8090/_/ to access the PocketBase admin
-2. Create a superuser account
-3. Go to Settings > Import collections and import `pb_schema.json`
-4. Return to http://localhost:8090 and register a user account
+1. Access the app at http://localhost:8090
+2. Click "Register" to create a user account
+3. Start adding your inventory!
+
+**Admin Panel**: Access http://localhost:8090/_/ with your admin credentials to manage collections, users, and settings.
 
 ### Local Development
 
@@ -67,6 +83,11 @@ Or run both together:
 ```bash
 npm run start
 ```
+
+For local development, you'll need to manually import the schema:
+1. Navigate to http://localhost:8090/_/
+2. Create a superuser account
+3. Go to Settings > Import collections and import `pb_schema.json`
 
 ## Available Scripts
 
@@ -98,14 +119,9 @@ gunlocker/
 │   └── pages/            # Page components
 ├── Dockerfile            # Container build
 ├── docker-compose.yml    # Container orchestration
+├── entrypoint.sh         # Docker entrypoint with auto-setup
 └── pb_schema.json        # PocketBase collection schema
 ```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_POCKETBASE_URL` | PocketBase API URL | Auto-detected |
 
 ## Data Storage
 
@@ -129,6 +145,19 @@ cp -r pocketbase/pb_data ./backup
 - **maintenance_logs** - Per-firearm maintenance history
 - **range_trips** - Range session logs
 - **range_trip_ammo** - Ammo usage per range trip
+
+## Versioning
+
+This project uses semantic versioning with automatic releases:
+- `feat:` commits trigger a minor version bump
+- `fix:` commits trigger a patch version bump
+- `BREAKING CHANGE:` in commit body triggers a major version bump
+
+Docker images are tagged with:
+- `latest` - Most recent main branch build
+- `vX.Y.Z` - Specific version
+- `vX.Y` - Latest patch of major.minor
+- `vX` - Latest of major version
 
 ## License
 
