@@ -29,8 +29,8 @@ export default function FirearmDetail() {
 
   const { data: firearm, isLoading, error } = useFirearm(id)
   const { data: maintenanceLogs } = useMaintenanceForFirearm(id)
-  const { data: optics } = useOptics({ filter: `mounted_on = "${id}"` })
-  const { data: accessories } = useAccessories({ filter: `mounted_on = "${id}"` })
+  const { data: optics } = useOptics({ filter: `mounted_on = '${id}'` })
+  const { data: accessories } = useAccessories({ filter: `mounted_on = '${id}'` })
   const deleteFirearm = useDeleteFirearm()
 
   const handleDelete = async () => {

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import pb from '../lib/pocketbase'
+import logger from '../lib/logger'
 import toast from 'react-hot-toast'
 
 const COLLECTION = 'optics'
@@ -9,11 +10,14 @@ export function useOptics(options = {}) {
     queryKey: [COLLECTION, options],
     queryFn: async () => {
       const { filter = '', sort = '-created', expand = 'mounted_on' } = options
-      return pb.collection(COLLECTION).getFullList({
+      logger.query(COLLECTION, { filter, sort, expand })
+      const result = await pb.collection(COLLECTION).getFullList({
         filter,
         sort,
         expand,
       })
+      logger.debug('Optics', `Fetched ${result.length} optics`, { filter })
+      return result
     },
   })
 }

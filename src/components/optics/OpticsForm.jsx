@@ -3,10 +3,20 @@ import { useOptic, useCreateOptic, useUpdateOptic, useDeleteOptic, OPTIC_TYPES }
 import { useFirearms } from '../../hooks/useFirearms'
 import PhotoUpload from '../common/PhotoUpload'
 import DocumentUpload from '../common/DocumentUpload'
+import logger from '../../lib/logger'
 
 export default function OpticsForm({ opticId, onClose }) {
   const { data: existingOptic, isLoading: loadingOptic } = useOptic(opticId)
-  const { data: firearms } = useFirearms()
+  const { data: firearms, isLoading: loadingFirearms, error: firearmsError } = useFirearms()
+
+  // Debug logging
+  useEffect(() => {
+    logger.debug('OpticsForm', 'Firearms data', {
+      count: firearms?.length,
+      loading: loadingFirearms,
+      error: firearmsError?.message
+    })
+  }, [firearms, loadingFirearms, firearmsError])
   const createOptic = useCreateOptic()
   const updateOptic = useUpdateOptic()
   const deleteOptic = useDeleteOptic()
