@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import pb, { getUserId } from '../lib/pocketbase'
+import { buildCreateBody, buildUpdateBody } from '../lib/records'
 import toast from 'react-hot-toast'
 
 const COLLECTION = 'accessories'
+const FILE_FIELDS = ['photos', 'documents']
 
 export function useAccessories(options = {}) {
   return useQuery({
@@ -36,23 +38,8 @@ export function useCreateAccessory() {
 
   return useMutation({
     mutationFn: async (data) => {
-      const formData = new FormData()
-
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'photos' || key === 'documents') {
-          if (value && value.length > 0) {
-            Array.from(value).forEach((file) => {
-              formData.append(key, file)
-            })
-          }
-        } else if (value !== undefined && value !== null && value !== '') {
-          formData.append(key, value)
-        }
-      })
-
-      formData.append('user', getUserId())
-
-      return pb.collection(COLLECTION).create(formData)
+      const body = buildCreateBody(data, { fileFields: FILE_FIELDS, extra: { user: getUserId() } })
+      return pb.collection(COLLECTION).create(body)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
@@ -69,22 +56,9 @@ export function useUpdateAccessory() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, data }) => {
-      const formData = new FormData()
-
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'photos' || key === 'documents') {
-          if (value && value.length > 0) {
-            Array.from(value).forEach((file) => {
-              formData.append(key, file)
-            })
-          }
-        } else if (value !== undefined && value !== null && value !== '') {
-          formData.append(key, value)
-        }
-      })
-
-      return pb.collection(COLLECTION).update(id, formData)
+    mutationFn: async ({ id, data, removed }) => {
+      const body = buildUpdateBody(data, { fileFields: FILE_FIELDS, removed })
+      return pb.collection(COLLECTION).update(id, body)
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })

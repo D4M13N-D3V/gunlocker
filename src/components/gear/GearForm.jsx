@@ -67,7 +67,11 @@ export default function GearForm({ gearId, onClose }) {
 
     try {
       if (gearId) {
-        await updateGear.mutateAsync({ id: gearId, data })
+        const removed = {
+          photos: (existingGear?.photos || []).filter((p) => !existingPhotos.includes(p)),
+          documents: (existingGear?.documents || []).filter((d) => !existingDocuments.includes(d)),
+        }
+        await updateGear.mutateAsync({ id: gearId, data, removed })
       } else {
         await createGear.mutateAsync(data)
       }

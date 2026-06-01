@@ -48,7 +48,7 @@ export default function MaintenanceForm({ logId, firearmId, onClose }) {
     e.preventDefault()
     const data = { ...formData, photos }
     try {
-      if (logId) { await updateMaintenance.mutateAsync({ id: logId, data }) }
+      if (logId) { await updateMaintenance.mutateAsync({ id: logId, data, removed: { photos: (existingLog?.photos || []).filter((p) => !existingPhotos.includes(p)) } }) }
       else { await createMaintenance.mutateAsync(data) }
       onClose()
     } catch (error) {}
