@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import pb from '../lib/pocketbase'
+import pb, { getUserId } from '../lib/pocketbase'
 import toast from 'react-hot-toast'
 
 const COLLECTION = 'ammunition'
@@ -34,7 +34,7 @@ export function useCreateAmmo() {
   return useMutation({
     mutationFn: async (data) => {
       // Filter out empty values to avoid PocketBase issues
-      const cleanData = { user: pb.authStore.model.id }
+      const cleanData = { user: getUserId() }
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           cleanData[key] = value
@@ -44,6 +44,7 @@ export function useCreateAmmo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Ammunition added successfully')
     },
     onError: (error) => {
@@ -68,6 +69,7 @@ export function useUpdateAmmo() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
       toast.success('Ammunition updated successfully')
     },
@@ -86,6 +88,7 @@ export function useDeleteAmmo() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Ammunition deleted')
     },
     onError: (error) => {
@@ -105,6 +108,7 @@ export function useUpdateAmmoQuantity() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
     },
   })

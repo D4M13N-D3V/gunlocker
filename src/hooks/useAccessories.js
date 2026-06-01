@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import pb from '../lib/pocketbase'
+import pb, { getUserId } from '../lib/pocketbase'
 import toast from 'react-hot-toast'
 
 const COLLECTION = 'accessories'
@@ -50,12 +50,13 @@ export function useCreateAccessory() {
         }
       })
 
-      formData.append('user', pb.authStore.model.id)
+      formData.append('user', getUserId())
 
       return pb.collection(COLLECTION).create(formData)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Accessory added successfully')
     },
     onError: (error) => {
@@ -87,6 +88,7 @@ export function useUpdateAccessory() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
       toast.success('Accessory updated successfully')
     },
@@ -105,6 +107,7 @@ export function useDeleteAccessory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Accessory deleted')
     },
     onError: (error) => {
