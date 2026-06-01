@@ -1,10 +1,12 @@
-import { differenceInDays, parseISO, format } from 'date-fns'
+import { differenceInDays, parseISO, format, startOfDay } from 'date-fns'
 
 export default function WarrantyBadge({ expiryDate, showDate = false }) {
   if (!expiryDate) return null
 
-  const today = new Date()
-  const expiry = parseISO(expiryDate)
+  // Compare calendar days (local midnight) so a warranty expiring "today" is
+  // not mislabeled Expired for users in timezones behind UTC.
+  const today = startOfDay(new Date())
+  const expiry = startOfDay(parseISO(expiryDate))
   const daysRemaining = differenceInDays(expiry, today)
 
   let status, bgColor, textColor, label
@@ -68,8 +70,10 @@ export default function WarrantyBadge({ expiryDate, showDate = false }) {
 export function WarrantyIcon({ expiryDate, size = 'sm' }) {
   if (!expiryDate) return null
 
-  const today = new Date()
-  const expiry = parseISO(expiryDate)
+  // Compare calendar days (local midnight) so a warranty expiring "today" is
+  // not mislabeled Expired for users in timezones behind UTC.
+  const today = startOfDay(new Date())
+  const expiry = startOfDay(parseISO(expiryDate))
   const daysRemaining = differenceInDays(expiry, today)
 
   let color
