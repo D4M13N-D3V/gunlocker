@@ -46,7 +46,13 @@ Access the app at http://localhost:8090
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PB_ADMIN_EMAIL` | Admin email (first run only) | `admin@gunlocker.local` |
-| `PB_ADMIN_PASSWORD` | Admin password (first run only) | `changeme123` |
+| `PB_ADMIN_PASSWORD` | Admin password (first run only) | _randomly generated_ |
+
+> **Security note:** `PB_ADMIN_PASSWORD` has no shared default. If you don't
+> provide one, the container generates a strong random password on first run and
+> prints it **once** in the startup logs (`docker logs gunlocker`). Save it and
+> change it in the admin panel. Always set your own strong password for any
+> internet-facing deployment.
 
 ### First Time Setup
 
@@ -54,7 +60,8 @@ On first run, the container will automatically create an admin account using the
 
 1. **Access the Admin Panel**
    - Navigate to http://localhost:8090/_/
-   - Log in with your admin credentials (the email/password from env vars, or defaults if not set)
+   - Log in with your admin credentials (the email/password you set, or the
+     randomly generated password printed in the container logs on first run)
 
 2. **Import the Schema**
    - Go to **Settings** (gear icon) → **Import collections**

@@ -5,9 +5,17 @@ DATA_DIR="/pb/pb_data"
 SCHEMA_FILE="/pb/pb_schema.json"
 SETUP_MARKER="$DATA_DIR/.setup_complete"
 
-# Default admin credentials (should be overridden via env vars)
+# Admin email defaults; the password must never default to a weak shared value.
 PB_ADMIN_EMAIL="${PB_ADMIN_EMAIL:-admin@gunlocker.local}"
-PB_ADMIN_PASSWORD="${PB_ADMIN_PASSWORD:-changeme123}"
+
+# If no admin password was provided, generate a strong random one and print it
+# once so the operator can retrieve it. This avoids shipping a known default
+# password (previously "changeme123") that left every deployment exploitable.
+GENERATED_PASSWORD=0
+if [ -z "$PB_ADMIN_PASSWORD" ]; then
+    PB_ADMIN_PASSWORD="$(head -c 24 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)"
+    GENERATED_PASSWORD=1
+fi
 
 # If setup is already complete, just run PocketBase
 if [ -f "$SETUP_MARKER" ]; then
@@ -85,6 +93,11 @@ touch "$SETUP_MARKER"
 echo "==================================="
 echo "  Setup Complete!"
 echo "  Admin: $PB_ADMIN_EMAIL"
+if [ "$GENERATED_PASSWORD" = "1" ]; then
+    echo "  Generated admin password: $PB_ADMIN_PASSWORD"
+    echo "  ^ Save this now and change it in the admin panel."
+    echo "    It will NOT be shown again."
+fi
 echo "==================================="
 echo ""
 

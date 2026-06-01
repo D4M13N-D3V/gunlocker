@@ -53,9 +53,10 @@ RUN chmod +x /pb/entrypoint.sh
 # Create data directory
 RUN mkdir -p /pb/pb_data
 
-# Environment variables for initial setup
+# Initial-setup admin email (override at runtime). The admin PASSWORD is
+# intentionally NOT baked into the image: if PB_ADMIN_PASSWORD is not provided
+# at runtime, entrypoint.sh generates a strong random one and prints it once.
 ENV PB_ADMIN_EMAIL=admin@gunlocker.local
-ENV PB_ADMIN_PASSWORD=changeme123
 
 # Expose port
 EXPOSE 8090

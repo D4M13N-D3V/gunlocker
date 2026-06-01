@@ -24,7 +24,12 @@ pb.beforeSend = function (url, options) {
 pb.afterSend = function (response, data) {
   const status = response.status
   const statusColor = status >= 400 ? 'error' : 'debug'
-  logger[statusColor]('PocketBase', `Response: ${status}`, data)
+  // Never log the raw auth token, even at debug level.
+  const safeData =
+    data && typeof data === 'object' && 'token' in data
+      ? { ...data, token: '[REDACTED]' }
+      : data
+  logger[statusColor]('PocketBase', `Response: ${status}`, safeData)
   return data
 }
 

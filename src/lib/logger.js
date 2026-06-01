@@ -9,10 +9,13 @@ const LOG_LEVELS = {
 }
 
 const getLogLevel = () => {
+  // Verbose by default in dev, but quiet (warnings+) in production builds so
+  // request/response bodies and auth details are not dumped to the console.
+  const defaultLevel = import.meta.env.PROD ? 'warn' : 'debug'
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('LOG_LEVEL') || 'debug'
+    return localStorage.getItem('LOG_LEVEL') || defaultLevel
   }
-  return 'debug'
+  return defaultLevel
 }
 
 const shouldLog = (level) => {
