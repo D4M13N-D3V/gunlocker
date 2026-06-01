@@ -73,6 +73,11 @@ jobs:
 
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@v0.33.0
+        env:
+          # Authenticate the Trivy binary/DB downloads so they aren't blocked by
+          # GitHub's unauthenticated API rate limits.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TRIVY_SKIP_VERSION_CHECK: "true"
         with:
           scan-type: fs
           scan-ref: .
