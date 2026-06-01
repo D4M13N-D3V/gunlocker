@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import pb from '../lib/pocketbase'
-import { differenceInDays, parseISO } from 'date-fns'
+import { differenceInDays, parseISO, startOfDay } from 'date-fns'
 
 export function useInventory() {
   return useQuery({
@@ -45,8 +45,12 @@ export function useInventoryStats() {
     totalGear: inventory.gear.length,
     totalOptics: inventory.optics.length,
     totalAccessories: inventory.accessories.length,
+    // Count of distinct inventory records. Includes ammunition line items so
+    // it matches `inventory.all` and totalValue (which both include ammo);
+    // `totalAmmunition` separately reports the summed round count.
     totalItems:
       inventory.firearms.length +
+      inventory.ammunition.length +
       inventory.gear.length +
       inventory.optics.length +
       inventory.accessories.length,
@@ -67,13 +71,14 @@ export function useWarrantyAlerts() {
     return { data: [], ...rest }
   }
 
-  const today = new Date()
+  // Local midnight so day-count buckets aren't off by one across timezones.
+  const today = startOfDay(new Date())
   const alerts = []
 
   const checkWarranty = (items, category) => {
     items.forEach((item) => {
       if (item.warranty_expires) {
-        const expiryDate = parseISO(item.warranty_expires)
+        const expiryDate = startOfDay(parseISO(item.warranty_expires))
         const daysRemaining = differenceInDays(expiryDate, today)
 
         if (daysRemaining <= 90) {
