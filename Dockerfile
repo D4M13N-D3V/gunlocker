@@ -58,6 +58,11 @@ RUN mkdir -p /pb/pb_data
 # at runtime, entrypoint.sh generates a strong random one and prints it once.
 ENV PB_ADMIN_EMAIL=admin@gunlocker.local
 
+# Drop root: run PocketBase as an unprivileged user. /pb (incl. pb_data) is
+# owned by it so the data volume is writable; port 8090 is unprivileged.
+RUN addgroup -S pb && adduser -S -G pb pb && chown -R pb:pb /pb
+USER pb
+
 # Expose port
 EXPOSE 8090
 
