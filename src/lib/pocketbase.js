@@ -54,9 +54,18 @@ export const getUserId = () => {
   return id
 }
 
+// File fields are `protected`, so file URLs need a short-lived file token
+// appended (?token=...). The token is fetched/refreshed by AuthProvider and
+// mirrored here so the synchronous getFileUrl() callers keep working.
+let fileToken = ''
+export const setFileToken = (token) => {
+  fileToken = token || ''
+}
+
 export const getFileUrl = (record, filename, options = {}) => {
   if (!record || !filename) return null
-  return pb.files.getURL(record, filename, options)
+  const opts = fileToken ? { ...options, token: fileToken } : options
+  return pb.files.getURL(record, filename, opts)
 }
 
 export const getThumbUrl = (record, filename, thumb = '100x100') => {
