@@ -44,6 +44,16 @@ pb.authStore.onChange((token, model) => {
 
 export default pb
 
+// Returns the current user's id, throwing a clear error if the session has
+// expired/cleared. Prefer authStore.record (authStore.model is deprecated).
+export const getUserId = () => {
+  const id = pb.authStore.record?.id || pb.authStore.model?.id
+  if (!id) {
+    throw new Error('You must be signed in to do that')
+  }
+  return id
+}
+
 export const getFileUrl = (record, filename, options = {}) => {
   if (!record || !filename) return null
   return pb.files.getURL(record, filename, options)
