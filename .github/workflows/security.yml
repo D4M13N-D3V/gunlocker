@@ -71,13 +71,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Use the dedicated installer rather than trivy-action's bundled
-      # install.sh, which fails under pipefail on the hosted runners.
+      # Download the pinned Trivy binary directly. The action-bundled install.sh
+      # defaulted to a nonexistent version (v0.65.0) and failed; this is explicit.
       - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2.6
-        with:
-          version: v0.65.0
-          cache: true
+        env:
+          TRIVY_VERSION: "0.70.0"
+        run: |
+          curl -sfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -o /tmp/trivy.tar.gz
+          tar -xzf /tmp/trivy.tar.gz -C /tmp trivy
+          sudo mv /tmp/trivy /usr/local/bin/trivy
+          trivy --version
 
       - name: Run Trivy filesystem scan
         env:
