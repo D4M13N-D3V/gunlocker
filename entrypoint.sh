@@ -114,6 +114,16 @@ else
         -H "Content-Type: application/json" \
         -d '{"meta":{"appName":"Gun Locker","hideControls":false,"senderName":"Gun Locker","senderAddress":"noreply@gunlocker.local"}}' 2>/dev/null || echo "Warning: Could not set app settings"
 
+    # Harden the built-in users collection so an authenticated user can only
+    # list/view their OWN account. PocketBase defaults can otherwise let any
+    # logged-in user enumerate every account and harvest emails. Non-fatal.
+    echo "Hardening users collection access rules..."
+    curl -s -X PATCH http://localhost:8090/api/collections/users \
+        -H "Authorization: $TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{"listRule":"id = @request.auth.id","viewRule":"id = @request.auth.id"}' >/dev/null 2>&1 \
+        || echo "Warning: Could not harden users collection (set listRule/viewRule manually in the admin UI)"
+
     echo "Application configured!"
 fi
 

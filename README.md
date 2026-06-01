@@ -148,6 +148,27 @@ gunlocker/
 └── pb_schema.json        # PocketBase collection schema
 ```
 
+## Security
+
+This image applies several hardening defaults, and a couple of items are left
+to your deployment:
+
+- **No default admin password** — set `PB_ADMIN_PASSWORD`, or a strong random one
+  is generated and printed once on first run (see above).
+- **Runs as a non-root user** inside the container. If you are upgrading an
+  existing deployment whose `pb_data` volume was created by an older root-based
+  image, fix ownership once: `docker run --rm -v gunlocker_data:/d alpine chown -R 100:101 /d` (adjust uid/gid to the image's `pb` user).
+- **Per-user data isolation** — every collection is scoped to its owner, and the
+  built-in `users` collection is restricted so a logged-in user can only see
+  their own account.
+- **Restrict the admin UI** — the PocketBase superuser console at `/_/` is served
+  on the same port as the app. Do **not** expose it to the internet; put the
+  container behind a reverse proxy that blocks `/_/` (or allowlists it to your
+  IP/VPN).
+- **Add security headers / TLS at the proxy** — terminate TLS and set
+  `Content-Security-Policy`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`,
+  and HSTS at your reverse proxy.
+
 ## Data Storage
 
 All data is stored in the `pb_data` directory (or Docker volume). To backup:
