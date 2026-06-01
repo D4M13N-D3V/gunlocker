@@ -71,20 +71,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@v0.33.0
-        env:
-          # Authenticate the Trivy binary/DB downloads so they aren't blocked by
-          # GitHub's unauthenticated API rate limits.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TRIVY_SKIP_VERSION_CHECK: "true"
+      # Use the dedicated installer rather than trivy-action's bundled
+      # install.sh, which fails under pipefail on the hosted runners.
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.6
         with:
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln,secret,misconfig
-          format: sarif
-          output: trivy-results.sarif
-          severity: CRITICAL,HIGH
+          version: v0.65.0
+          cache: true
+
+      - name: Run Trivy filesystem scan
+        env:
+          # Authenticate DB pulls so they aren't blocked by GitHub rate limits.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          trivy fs . \
+            --scanners vuln,secret,misconfig \
+            --severity CRITICAL,HIGH \
+            --format sarif \
+            --output trivy-results.sarif \
+            --exit-code 0
 
       - name: Upload Trivy results to code scanning
         uses: github/codeql-action/upload-sarif@v3
