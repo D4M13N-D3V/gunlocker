@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM alpine:3.19
+FROM alpine:3.23
 
 # Install dependencies
 RUN apk add --no-cache \
