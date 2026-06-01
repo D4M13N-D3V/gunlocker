@@ -54,31 +54,65 @@ AUTH_RESPONSE=$(curl -s -X POST http://localhost:8090/api/collections/_superuser
 TOKEN=$(echo "$AUTH_RESPONSE" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
 
 if [ -z "$TOKEN" ]; then
-    echo "Warning: Could not authenticate. Schema import may fail."
-    echo "You can manually import pb_schema.json via the admin UI."
+    echo "ERROR: Could not authenticate as superuser; cannot import schema."
+    echo "Auth response was: $AUTH_RESPONSE"
+    kill $PB_PID 2>/dev/null || true
+    exit 1
 else
-    # Import collections schema
+    # Import collections schema.
+    #
+    # pb_schema.json is a bare JSON array of collections, but PocketBase 0.23's
+    # PUT /api/collections/import expects an OBJECT:
+    #   {"collections": [...], "deleteMissing": false}
+    # Sending the raw array binds an empty collection list, imports nothing, and
+    # still returns 200 -- so we MUST wrap it before sending.
     echo "Importing collections schema..."
     if [ -f "$SCHEMA_FILE" ]; then
+        printf '{"collections":%s,"deleteMissing":false}' "$(cat "$SCHEMA_FILE")" > /tmp/import.json
+
         IMPORT_RESULT=$(curl -s -X PUT http://localhost:8090/api/collections/import \
             -H "Authorization: $TOKEN" \
             -H "Content-Type: application/json" \
-            -d @"$SCHEMA_FILE" 2>/dev/null || echo "failed")
+            -d @/tmp/import.json 2>/dev/null || echo "failed")
 
-        if echo "$IMPORT_RESULT" | grep -q "code"; then
-            echo "Warning: Schema import may have failed: $IMPORT_RESULT"
-            echo "You can manually import pb_schema.json via the admin UI."
-        else
-            echo "Schema imported successfully!"
+        # An error response carries a "code"; a successful import returns 204 (empty body).
+        if echo "$IMPORT_RESULT" | grep -q '"code"'; then
+            echo "ERROR: Schema import failed: $IMPORT_RESULT"
+            kill $PB_PID 2>/dev/null || true
+            exit 1
         fi
+
+        # Verify the custom collections actually exist instead of trusting the
+        # status code. List collections and confirm our expected names are present.
+        EXPECTED="firearms ammunition gear optics accessories maintenance_logs range_trips range_trip_ammo"
+        COLLECTIONS_JSON=$(curl -s "http://localhost:8090/api/collections?perPage=200" \
+            -H "Authorization: $TOKEN" 2>/dev/null || echo "")
+
+        MISSING=""
+        for name in $EXPECTED; do
+            if ! echo "$COLLECTIONS_JSON" | grep -q "\"name\":\"$name\""; then
+                MISSING="$MISSING $name"
+            fi
+        done
+
+        if [ -n "$MISSING" ]; then
+            echo "ERROR: Schema import reported success but these collections are missing:$MISSING"
+            echo "Import response was: $IMPORT_RESULT"
+            kill $PB_PID 2>/dev/null || true
+            exit 1
+        fi
+
+        echo "Schema imported successfully! Verified collections:$( for n in $EXPECTED; do printf ' %s' "$n"; done )"
     fi
 
-    # Set application settings
+    # Set application settings. appUrl is intentionally omitted: PocketBase
+    # rejects a blank appUrl with "Cannot be blank", and we don't know the
+    # deployment URL at first boot. Operators can set it later in the admin UI.
     echo "Configuring application settings..."
     curl -s -X PATCH http://localhost:8090/api/settings \
         -H "Authorization: $TOKEN" \
         -H "Content-Type: application/json" \
-        -d '{"meta":{"appName":"Gun Locker","appUrl":"","hideControls":false,"senderName":"Gun Locker","senderAddress":"noreply@gunlocker.local"}}' 2>/dev/null || echo "Warning: Could not set app settings"
+        -d '{"meta":{"appName":"Gun Locker","hideControls":false,"senderName":"Gun Locker","senderAddress":"noreply@gunlocker.local"}}' 2>/dev/null || echo "Warning: Could not set app settings"
 
     echo "Application configured!"
 fi
