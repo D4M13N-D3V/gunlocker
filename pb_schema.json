@@ -29,7 +29,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -57,7 +57,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -88,7 +88,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -118,7 +118,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -147,7 +147,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -174,7 +174,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -198,7 +198,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   },
@@ -221,7 +221,7 @@
     "indexes": [],
     "listRule": "@request.auth.id != '' && user = @request.auth.id",
     "viewRule": "@request.auth.id != '' && user = @request.auth.id",
-    "createRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.body.user = @request.auth.id",
     "updateRule": "@request.auth.id != '' && user = @request.auth.id",
     "deleteRule": "@request.auth.id != '' && user = @request.auth.id"
   }
