@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import pb from '../lib/pocketbase'
+import pb, { getUserId } from '../lib/pocketbase'
 import logger from '../lib/logger'
 import toast from 'react-hot-toast'
 
@@ -54,12 +54,13 @@ export function useCreateOptic() {
         }
       })
 
-      formData.append('user', pb.authStore.model.id)
+      formData.append('user', getUserId())
 
       return pb.collection(COLLECTION).create(formData)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Optic added successfully')
     },
     onError: (error) => {
@@ -91,6 +92,7 @@ export function useUpdateOptic() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
       toast.success('Optic updated successfully')
     },
@@ -109,6 +111,7 @@ export function useDeleteOptic() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Optic deleted')
     },
     onError: (error) => {

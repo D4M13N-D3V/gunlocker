@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import pb from '../lib/pocketbase'
+import pb, { getUserId } from '../lib/pocketbase'
 import logger from '../lib/logger'
 import toast from 'react-hot-toast'
 
@@ -43,12 +43,8 @@ export function useCreateFirearm() {
     mutationFn: async (data) => {
       logger.mutation(COLLECTION, 'create', { name: data.name, data })
 
-      const userId = pb.authStore.model?.id
+      const userId = getUserId()
       logger.debug('Firearms', 'Creating with user ID', { userId, isAuthenticated: pb.authStore.isValid })
-
-      if (!userId) {
-        throw new Error('User not authenticated')
-      }
 
       const hasFiles = (data.photos?.length > 0) || (data.documents?.length > 0)
 
@@ -83,6 +79,7 @@ export function useCreateFirearm() {
     onSuccess: (result) => {
       logger.info('Firearms', 'Created firearm', { id: result.id, name: result.name })
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Firearm added successfully')
     },
     onError: (error) => {
@@ -142,6 +139,7 @@ export function useUpdateFirearm() {
     onSuccess: (result, { id }) => {
       logger.info('Firearms', 'Updated firearm', { id })
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
       toast.success('Firearm updated successfully')
     },
@@ -163,6 +161,7 @@ export function useDeleteFirearm() {
     onSuccess: (_, id) => {
       logger.info('Firearms', 'Deleted firearm', { id })
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Firearm deleted')
     },
     onError: (error) => {
@@ -185,6 +184,7 @@ export function useUpdateRoundCount() {
     onSuccess: (result, { id, roundsToAdd }) => {
       logger.info('Firearms', 'Updated round count', { id, newCount: result.round_count })
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
     },
   })

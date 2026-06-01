@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import pb from '../lib/pocketbase'
+import pb, { getUserId } from '../lib/pocketbase'
 import toast from 'react-hot-toast'
 
 const COLLECTION = 'maintenance_logs'
@@ -64,12 +64,13 @@ export function useCreateMaintenance() {
         }
       })
 
-      formData.append('user', pb.authStore.model.id)
+      formData.append('user', getUserId())
 
       return pb.collection(COLLECTION).create(formData)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Maintenance log added')
     },
     onError: (error) => {
@@ -101,6 +102,7 @@ export function useUpdateMaintenance() {
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       queryClient.invalidateQueries({ queryKey: [COLLECTION, id] })
       toast.success('Maintenance log updated')
     },
@@ -119,6 +121,7 @@ export function useDeleteMaintenance() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
       toast.success('Maintenance log deleted')
     },
     onError: (error) => {
