@@ -43,7 +43,7 @@ export default function AccessoryForm({ accessoryId, onClose }) {
     e.preventDefault()
     const data = { ...formData, photos, documents }
     try {
-      if (accessoryId) { await updateAccessory.mutateAsync({ id: accessoryId, data }) }
+      if (accessoryId) { await updateAccessory.mutateAsync({ id: accessoryId, data, removed: { photos: (existingAccessory?.photos || []).filter((p) => !existingPhotos.includes(p)), documents: (existingAccessory?.documents || []).filter((d) => !existingDocuments.includes(d)) } }) }
       else { await createAccessory.mutateAsync(data) }
       onClose()
     } catch (error) {}

@@ -53,7 +53,7 @@ export default function OpticsForm({ opticId, onClose }) {
     e.preventDefault()
     const data = { ...formData, photos, documents }
     try {
-      if (opticId) { await updateOptic.mutateAsync({ id: opticId, data }) }
+      if (opticId) { await updateOptic.mutateAsync({ id: opticId, data, removed: { photos: (existingOptic?.photos || []).filter((p) => !existingPhotos.includes(p)), documents: (existingOptic?.documents || []).filter((d) => !existingDocuments.includes(d)) } }) }
       else { await createOptic.mutateAsync(data) }
       onClose()
     } catch (error) {}

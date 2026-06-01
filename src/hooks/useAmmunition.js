@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import pb, { getUserId } from '../lib/pocketbase'
+import { buildCreateBody, buildUpdateBody } from '../lib/records'
 import toast from 'react-hot-toast'
 
 const COLLECTION = 'ammunition'
@@ -33,14 +34,8 @@ export function useCreateAmmo() {
 
   return useMutation({
     mutationFn: async (data) => {
-      // Filter out empty values to avoid PocketBase issues
-      const cleanData = { user: getUserId() }
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          cleanData[key] = value
-        }
-      })
-      return pb.collection(COLLECTION).create(cleanData)
+      const body = buildCreateBody(data, { extra: { user: getUserId() } })
+      return pb.collection(COLLECTION).create(body)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })
@@ -58,14 +53,8 @@ export function useUpdateAmmo() {
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      // Filter out empty values, but allow explicit null to clear fields
-      const cleanData = {}
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
-          cleanData[key] = value === null ? '' : value
-        }
-      })
-      return pb.collection(COLLECTION).update(id, cleanData)
+      const body = buildUpdateBody(data)
+      return pb.collection(COLLECTION).update(id, body)
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: [COLLECTION] })

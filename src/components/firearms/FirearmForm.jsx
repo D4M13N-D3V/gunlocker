@@ -88,7 +88,12 @@ export default function FirearmForm({ firearmId, onClose }) {
 
     try {
       if (firearmId) {
-        await updateFirearm.mutateAsync({ id: firearmId, data })
+        // Existing files the user removed must be explicitly deleted server-side.
+        const removed = {
+          photos: (existingFirearm?.photos || []).filter((p) => !existingPhotos.includes(p)),
+          documents: (existingFirearm?.documents || []).filter((d) => !existingDocuments.includes(d)),
+        }
+        await updateFirearm.mutateAsync({ id: firearmId, data, removed })
       } else {
         await createFirearm.mutateAsync(data)
       }
