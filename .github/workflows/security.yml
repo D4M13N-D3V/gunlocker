@@ -1,0 +1,117 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly run so newly disclosed CVEs are caught even without a push
+    - cron: '27 3 * * 1'
+
+# Least privilege by default; jobs opt in to more where needed
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codeql:
+    name: Code Scanning (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+  dependency-audit:
+    name: Dependency Vulnerability Audit (npm)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      # Fails the build on high/critical advisories; moderate are reported but
+      # do not block (the remaining dev-server-only ones need a major bump).
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+
+  trivy:
+    name: Vulnerability, Secret & Misconfig Scan (Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Download the pinned Trivy binary directly. The action-bundled install.sh
+      # defaulted to a nonexistent version (v0.65.0) and failed; this is explicit.
+      - name: Install Trivy
+        env:
+          TRIVY_VERSION: "0.70.0"
+        run: |
+          curl -sfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -o /tmp/trivy.tar.gz
+          tar -xzf /tmp/trivy.tar.gz -C /tmp trivy
+          sudo mv /tmp/trivy /usr/local/bin/trivy
+          trivy --version
+
+      - name: Run Trivy filesystem scan
+        env:
+          # Authenticate DB pulls so they aren't blocked by GitHub rate limits.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          trivy fs . \
+            --scanners vuln,secret,misconfig \
+            --severity CRITICAL,HIGH \
+            --format sarif \
+            --output trivy-results.sarif \
+            --exit-code 0
+
+      - name: Upload Trivy results to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
+
+  gitleaks:
+    name: Secret Scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so secrets in prior commits are detected too
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

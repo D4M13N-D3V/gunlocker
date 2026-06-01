@@ -8,9 +8,12 @@ services:
     volumes:
       - pb_data:/pb/pb_data
     environment:
-      # Set your admin credentials (only used on first run)
-      - PB_ADMIN_EMAIL=admin@gunlocker.local
-      - PB_ADMIN_PASSWORD=changeme123
+      # Admin credentials, only used on first run. Provide PB_ADMIN_PASSWORD via
+      # your shell env or an (uncommitted) .env file — never hardcode it here.
+      # If left unset, the container generates a strong random password and
+      # prints it once in the logs on first start.
+      - PB_ADMIN_EMAIL=${PB_ADMIN_EMAIL:-admin@gunlocker.local}
+      - PB_ADMIN_PASSWORD=${PB_ADMIN_PASSWORD:-}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/health"]
