@@ -32,8 +32,23 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     logger.component('AuthProvider', 'mounted', { hasUser: !!pb.authStore.model })
-    setIsLoading(false)
-    refreshFileToken()
+
+    // The persisted token can look valid locally (authStore.isValid only checks
+    // JWT expiry) yet be rejected by the server. Verify it on load so a stale
+    // session goes to login instead of a broken, write-failing dashboard.
+    const validateSession = async () => {
+      if (pb.authStore.isValid) {
+        try {
+          await pb.collection('users').authRefresh()
+        } catch (error) {
+          logger.auth('Stored session is no longer valid - clearing', { error: error.message })
+          pb.authStore.clear()
+        }
+      }
+      setIsLoading(false)
+      refreshFileToken()
+    }
+    validateSession()
 
     const unsubscribe = pb.authStore.onChange((token, model) => {
       setUser(model)
