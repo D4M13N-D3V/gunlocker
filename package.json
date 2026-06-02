@@ -14,7 +14,7 @@
     "start": "concurrently \"npm run pocketbase\" \"npm run dev\""
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.17.0",
+    "@tanstack/react-query": "^5.101.0",
     "date-fns": "^3.2.0",
     "pocketbase": "^0.25.0",
     "react": "^18.2.0",
